@@ -1,6 +1,8 @@
 package com.dengzhanglin.favoriteapi.domain;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 
 @Entity
@@ -9,10 +11,19 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+
     @Column(unique = true, length = 100)
+    @NotBlank
+    @Size(min = 3, max = 50)
     private String email;
+
+    @Size(max = 20)
     private String name;
+
+    @NotBlank
+    @Size(min = 6, max = 30)
     private String password;
+
     private Integer status = 1;
     private Timestamp createdAt;
     private Timestamp updatedAt;
