@@ -27,10 +27,10 @@ public class UserService {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(password));
         user.setStatus(1);
-        Long currentTime = System.currentTimeMillis();
-        Timestamp timestamp = new Timestamp(currentTime);
-        user.setUpdatedAt(timestamp);
-        user.setCreatedAt(timestamp);
+//        Long currentTime = System.currentTimeMillis();
+//        Timestamp timestamp = new Timestamp(currentTime);
+//        user.setUpdatedAt(timestamp);
+//        user.setCreatedAt(timestamp);
         this.userRepository.save(user);
         return  user;
     }

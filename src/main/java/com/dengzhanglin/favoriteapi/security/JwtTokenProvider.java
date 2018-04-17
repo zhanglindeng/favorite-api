@@ -16,9 +16,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
-/**
- * Created by rajeevkumarsingh on 19/08/17.
- */
 @Component
 public class JwtTokenProvider {
 
@@ -57,12 +54,12 @@ public class JwtTokenProvider {
     }
 
     public Long getUserIdFromJWT(String token) {
-        return Long.parseLong(JWT.decode(token).getId());
+        return Long.parseLong(JWT.decode(token).getSubject());
     }
 
     public boolean validateToken(String authToken) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
+            Algorithm algorithm = Algorithm.HMAC512(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(authToken);
             System.out.println(jwt.getIssuer());
