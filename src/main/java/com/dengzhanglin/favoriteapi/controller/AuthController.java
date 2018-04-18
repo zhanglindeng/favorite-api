@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.time.Instant;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -57,6 +58,9 @@ public class AuthController {
         }
 
         User user = new User();
+        Instant instant = Instant.now();
+        user.setCreatedAt(instant);
+        user.setUpdatedAt(instant);
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
