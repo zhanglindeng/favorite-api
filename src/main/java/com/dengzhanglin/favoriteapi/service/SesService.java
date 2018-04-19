@@ -42,9 +42,11 @@ public class SesService {
                             .withBody(new Body().withHtml(new Content().withCharset("UTF-8").withData(content)))
                             .withSubject(new Content().withCharset("UTF-8").withData(subject)))
                     .withSource(this.from);
+            Long start = System.currentTimeMillis();
             SendEmailResult result = client.sendEmail(request);
             // TODO save email message
             logger.info("[SES]" + result.getMessageId());
+            logger.info("[SES]time: " + (System.currentTimeMillis() - start));
             return true;
         } catch (Exception ex) {
             System.out.println("The email was not sent. Error message: " + ex.getMessage());
