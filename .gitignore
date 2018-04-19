@@ -25,3 +25,5 @@
 /.nb-gradle/
 app.log
 app.log*.gz
+
+src/main/resources/application-dev.properties
