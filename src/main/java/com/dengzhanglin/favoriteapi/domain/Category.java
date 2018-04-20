@@ -1,6 +1,5 @@
 package com.dengzhanglin.favoriteapi.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -11,23 +10,28 @@ import java.time.Instant;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
-public class User {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(unique = true, length = 100)
     @NotBlank
-    @Size(min = 3, max = 50)
-    private String email;
-
     @Size(max = 20)
     private String name;
 
-    @NotBlank
-    @JsonIgnore
-    private String password;
+    @ManyToOne
+    private User user;
+
+    @OneToMany(mappedBy = "category")
+    private List<Website> websites;
+
+    public List<Website> getWebsites() {
+        return websites;
+    }
+
+    public void setWebsites(List<Website> websites) {
+        this.websites = websites;
+    }
 
     private Integer status = 1;
     @CreatedDate
@@ -35,31 +39,12 @@ public class User {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "user")
-    private List<Category> categories;
-
-    public List<Category> getCategories() {
-        return categories;
-    }
-
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
-    }
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getName() {
@@ -70,12 +55,12 @@ public class User {
         this.name = name;
     }
 
-    public String getPassword() {
-        return password;
+    public User getUser() {
+        return user;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Integer getStatus() {
@@ -104,13 +89,13 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "Category{" +
                 "id=" + id +
-                ", email='" + email + '\'' +
                 ", name='" + name + '\'' +
+                ", user=" + user +
                 ", status=" + status +
-                ", createdAt='" + createdAt + '\'' +
-                ", updatedAt='" + updatedAt + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 '}';
     }
 }
