@@ -193,6 +193,6 @@ public class AuthController {
             registerVerifyCodeRepository.save(verifyCode);
         }
 
-        return ResponseEntity.ok(new ApiResponse(true, code));
+        return ResponseEntity.ok(new ApiResponse(true, "OK"));
     }
 }
