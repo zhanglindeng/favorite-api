@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface CategoryRepository extends CrudRepository<Category, Long> {
     @Query(value = "select * from category where user_id = :userId order by sort asc,id desc", nativeQuery = true)
-    List<Category> findByUserOrderByOrder(@Param("userId") Long userId);
+    List<Category> findByUserOrderBySort(@Param("userId") Long userId);
 }

@@ -70,7 +70,7 @@ public class CategoryController {
         // user_id
         Long userId = userPrincipal.getId();
 
-        List<Category> categories = this.categoryRepository.findByUserOrderByOrder(userId);
+        List<Category> categories = this.categoryRepository.findByUserOrderBySort(userId);
 
         Iterator<Category> iterator = categories.iterator();
 

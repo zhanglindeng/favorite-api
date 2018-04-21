@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.Instant;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -75,6 +77,15 @@ public class WebsiteController {
         Long userId = userPrincipal.getId();
 
         this.logger.info(loggerInfo + " " + userId);
+
+        // sort
+        List<Website> websites = this.websiteRepository.findByUserOrderBySort(userId);
+        Iterator<Website> iterator = websites.iterator();
+        Website temp;
+        while (iterator.hasNext()) {
+            temp = iterator.next();
+            this.logger.info(loggerInfo + " " + temp.getName() + " " + temp.getUrl());
+        }
 
         Website website = new Website();
         website.setUrl(addWebsiteRequest.getUrl());
