@@ -4,6 +4,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.Instant;
 
 @Entity
@@ -15,6 +17,9 @@ public class Website {
     @ManyToOne
     private Category category;
 
+    @ManyToOne
+    private User user;
+
     private String url;
     private String description;
     private Integer status = 1;
@@ -22,6 +27,34 @@ public class Website {
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
+    private Integer sort = 0;
+    @NotBlank
+    @Size(max = 20)
+    private String name;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
 
     public Long getId() {
         return id;

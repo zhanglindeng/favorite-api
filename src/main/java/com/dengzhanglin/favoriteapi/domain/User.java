@@ -38,6 +38,17 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Category> categories;
 
+    @OneToMany(mappedBy = "user")
+    private List<Website> websites;
+
+    public List<Website> getWebsites() {
+        return websites;
+    }
+
+    public void setWebsites(List<Website> websites) {
+        this.websites = websites;
+    }
+
     public List<Category> getCategories() {
         return categories;
     }
