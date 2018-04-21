@@ -14,6 +14,18 @@ public class RegisterRequest {
     @Size(min = 6, max = 30)
     private String password;
 
+    @NotBlank
+    @Size(min = 6, max = 6)
+    private String verifyCode;
+
+    public String getVerifyCode() {
+        return verifyCode;
+    }
+
+    public void setVerifyCode(String verifyCode) {
+        this.verifyCode = verifyCode;
+    }
+
     public String getEmail() {
         return email;
     }

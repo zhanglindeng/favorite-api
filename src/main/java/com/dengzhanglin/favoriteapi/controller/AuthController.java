@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -69,12 +70,42 @@ public class AuthController {
 
     @PostMapping(value = "/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+
+        String email = registerRequest.getEmail();
+        String loggerInfo = "[register]" + email;
+
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"), HttpStatus.BAD_REQUEST);
+            // return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"), HttpStatus.BAD_REQUEST);
+            logger.info(loggerInfo + " 邮箱已经注册");
+            return ResponseEntity.ok(new ApiResponse(false, "该邮箱已经注册"));
+        }
+
+        // 检查验证码
+        Optional<RegisterVerifyCode> last = registerVerifyCodeRepository.findLastByEmail(email);
+        if (!last.isPresent()) {
+            logger.info(loggerInfo + " 没有找到最后一个验证码");
+            return ResponseEntity.ok(new ApiResponse(false, "找不到该邮箱的验证码"));
+        }
+
+        String verifyCode = registerRequest.getVerifyCode();
+        RegisterVerifyCode lastCode = last.get();
+
+        // 验证码是否正确
+        if (!lastCode.getCode().equals(verifyCode)) {
+            // TODO 纪录注册验证码错误次数，防止被暴力破解
+            logger.info(loggerInfo + " 验证码错误");
+            return ResponseEntity.ok(new ApiResponse(false, "验证码错误"));
+        }
+
+        // 当前时间
+        Instant instant = Instant.now();
+        // 是否过期
+        if (instant.isAfter(lastCode.getExpiredAt())) {
+            logger.info(loggerInfo + " 验证码已经过期");
+            return ResponseEntity.ok(new ApiResponse(false, "验证码已经过期"));
         }
 
         User user = new User();
-        Instant instant = Instant.now();
         user.setCreatedAt(instant);
         user.setUpdatedAt(instant);
         user.setEmail(registerRequest.getEmail());
