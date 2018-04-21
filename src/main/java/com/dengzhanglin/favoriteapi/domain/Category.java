@@ -38,6 +38,14 @@ public class Category {
     private Instant createdAt;
     @LastModifiedDate
     private Instant updatedAt;
+    private Integer sort = 0;
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
+    }
 
     public Long getId() {
         return id;
