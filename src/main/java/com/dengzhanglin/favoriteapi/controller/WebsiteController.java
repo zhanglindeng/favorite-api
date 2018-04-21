@@ -15,10 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = "/website")
@@ -79,12 +78,54 @@ public class WebsiteController {
         this.logger.info(loggerInfo + " " + userId);
 
         // sort
+        Integer sort = 0;
         List<Website> websites = this.websiteRepository.findByUserOrderBySort(userId);
         Iterator<Website> iterator = websites.iterator();
         Website temp;
+        Map<Long, Integer> sortMap = new HashMap<>();
         while (iterator.hasNext()) {
             temp = iterator.next();
             this.logger.info(loggerInfo + " " + temp.getName() + " " + temp.getUrl());
+            sortMap.put(temp.getId(), temp.getSort());
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String updatedAt = simpleDateFormat.format(new Date());
+        Iterator iterator1 = sortMap.entrySet().iterator();
+        // 放在第一个
+        if (addWebsiteRequest.getFirst()) {
+            while (iterator1.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator1.next();
+                Long tempId = (Long) entry.getKey();
+                Integer tempSort = (Integer) entry.getValue();
+                this.logger.info(loggerInfo + " " + tempId + " " + tempSort);
+                this.websiteRepository.modifyById(tempSort + 1, tempId, updatedAt);
+            }
+        } else {
+            // after
+            Long after = addWebsiteRequest.getAfter();
+            while (iterator1.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator1.next();
+                Long tempId = (Long) entry.getKey();
+                Integer tempSort = (Integer) entry.getValue();
+                this.logger.info(loggerInfo + " id " + tempId + " " + tempSort);
+                if (tempId.equals(after)) {
+                    // new website sort
+                    sort = tempSort + 1;
+                    break;
+                }
+            }
+            Iterator iterator2 = sortMap.entrySet().iterator();
+            while (iterator2.hasNext()) {
+                Map.Entry entry = (Map.Entry) iterator2.next();
+                Long tempId = (Long) entry.getKey();
+                Integer tempSort = (Integer) entry.getValue();
+                this.logger.info(loggerInfo + " id " + tempId + " " + tempSort);
+                if (tempSort >= sort) {
+                    // 后面 sort + 1
+                    this.websiteRepository.modifyById(tempSort + 1, tempId, updatedAt);
+                }
+            }
         }
 
         Website website = new Website();
@@ -108,7 +149,8 @@ public class WebsiteController {
         user.setId(userId);
         website.setUser(user);
 
-        // TODO sort
+        // sort
+        website.setSort(sort);
 
         this.websiteRepository.save(website);
 
