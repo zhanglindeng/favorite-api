@@ -1,5 +1,6 @@
 package com.dengzhanglin.favoriteapi.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -29,16 +30,21 @@ public class User {
     @JsonIgnore
     private String password;
 
+    @JsonIgnore
     private Integer status = 1;
     @CreatedDate
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Instant createdAt;
     @LastModifiedDate
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Category> categories;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Website> websites;
 
     public List<Website> getWebsites() {

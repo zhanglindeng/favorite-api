@@ -1,5 +1,7 @@
 package com.dengzhanglin.favoriteapi.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -15,17 +17,22 @@ public class Website {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     private Category category;
 
     @ManyToOne
+    @JsonIgnore
     private User user;
 
     private String url;
     private String description;
+    @JsonIgnore
     private Integer status = 1;
     @CreatedDate
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Instant createdAt;
     @LastModifiedDate
+    @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Instant updatedAt;
     private Integer sort = 0;
     @NotBlank
