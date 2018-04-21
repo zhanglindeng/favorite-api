@@ -115,7 +115,8 @@ public class AuthController {
 
         System.out.println("user: " + result.toString());
 
-        return ResponseEntity.ok(new ApiResponse(true, "User registered successfully"));
+        // return ResponseEntity.ok(new ApiResponse(true, "User registered successfully"));
+        return ResponseEntity.ok(new JwtAuthenticationResponse(tokenProvider.generateToken(user)));
     }
 
     @PostMapping(value = "/verifyCode")

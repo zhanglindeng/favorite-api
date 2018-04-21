@@ -3,6 +3,7 @@ package com.dengzhanglin.favoriteapi.security;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.dengzhanglin.favoriteapi.domain.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +51,25 @@ public class JwtTokenProvider {
             System.out.println(exception.getMessage());
         }
 
+        return "";
+    }
+
+    public String generateToken(User user) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+
+        try {
+            Algorithm algorithm = Algorithm.HMAC512(jwtSecret);
+            return JWT.create()
+                    .withIssuer(user.getEmail())
+                    .withIssuedAt(new Date())
+                    .withSubject(Long.toString(user.getId()))
+                    .withExpiresAt(expiryDate)
+                    .sign(algorithm);
+        } catch (UnsupportedEncodingException exception) {
+            //UTF-8 encoding not supported
+            System.out.println(exception.getMessage());
+        }
         return "";
     }
 
