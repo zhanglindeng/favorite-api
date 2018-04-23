@@ -31,7 +31,7 @@ public class UserController extends BaseController {
         this.userRepository = userRepository;
     }
 
-    @GetMapping(value = "/")
+    @GetMapping(value = "")
     public JSONObject index(@CurrentUser UserPrincipal userPrincipal) {
 
         String loggerInfo = "[user:index]";
