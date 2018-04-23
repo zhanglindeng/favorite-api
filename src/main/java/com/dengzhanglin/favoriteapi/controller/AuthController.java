@@ -1,5 +1,6 @@
 package com.dengzhanglin.favoriteapi.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dengzhanglin.favoriteapi.domain.RegisterVerifyCode;
 import com.dengzhanglin.favoriteapi.domain.User;
 import com.dengzhanglin.favoriteapi.payload.*;
@@ -65,7 +66,11 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         String token = tokenProvider.generateToken(authentication);
-        return ResponseEntity.ok(new JwtAuthenticationResponse(token));
+        return ResponseEntity.ok(new JSONObject() {{
+            put("code", 0);
+            put("message", "OK");
+            put("token", token);
+        }});
     }
 
     @PostMapping(value = "/register")
@@ -113,10 +118,13 @@ public class AuthController {
 
         User result = userRepository.save(user);
 
-        System.out.println("user: " + result.toString());
+        logger.info(loggerInfo + " " + result.toString());
 
-        // return ResponseEntity.ok(new ApiResponse(true, "User registered successfully"));
-        return ResponseEntity.ok(new JwtAuthenticationResponse(tokenProvider.generateToken(user)));
+        return ResponseEntity.ok(new JSONObject() {{
+            put("code", 0);
+            put("message", "OK");
+            put("token", tokenProvider.generateToken(user));
+        }});
     }
 
     @PostMapping(value = "/verifyCode")
