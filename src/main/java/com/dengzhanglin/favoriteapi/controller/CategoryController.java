@@ -41,23 +41,23 @@ public class CategoryController {
         Optional<Category> row = this.categoryRepository.findById(id);
         if (!row.isPresent()) {
             this.logger.info(loggerInfo + " category");
-            return ResponseEntity.ok(new ApiResponse(false, "分类没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "分类没有找到"));
         }
         Category category = row.get();
         if (category.getUser() == null) {
             this.logger.info(loggerInfo + " user");
-            return ResponseEntity.ok(new ApiResponse(false, "分类没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "分类没有找到"));
         }
         if (!category.getUser().getId().equals(userId)) {
             this.logger.info(loggerInfo + " user_id");
-            return ResponseEntity.ok(new ApiResponse(false, "分类没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "分类没有找到"));
         }
 
         // TODO 怎么知道是否删除成功
         this.categoryRepository.delete(category);
         this.logger.info(loggerInfo + " deleted " + userId + " " + id);
 
-        return ResponseEntity.ok(new ApiResponse(true, "OK"));
+        return ResponseEntity.ok(new ApiResponse(0, "OK"));
     }
 
     @PostMapping(value = "/add")
@@ -136,6 +136,6 @@ public class CategoryController {
         category.setUpdatedAt(instant);
         this.categoryRepository.save(category);
 
-        return ResponseEntity.ok(new ApiResponse(true, "OK"));
+        return ResponseEntity.ok(new ApiResponse(0, "OK"));
     }
 }
