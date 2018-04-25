@@ -42,27 +42,27 @@ public class WebsiteController {
         Optional<Website> row = this.websiteRepository.findById(id);
         if (!row.isPresent()) {
             this.logger.info(loggerInfo + " website");
-            return ResponseEntity.ok(new ApiResponse(false, "网站没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "网站没有找到"));
         }
         Website website = row.get();
         if (website.getUser() == null) {
             this.logger.info(loggerInfo + " user");
-            return ResponseEntity.ok(new ApiResponse(false, "网站没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "网站没有找到"));
         }
         if (website.getCategory() == null) {
             this.logger.info(loggerInfo + " category");
-            return ResponseEntity.ok(new ApiResponse(false, "网站没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "网站没有找到"));
         }
         if (!website.getUser().getId().equals(userId)) {
             this.logger.info(loggerInfo + " user_id");
-            return ResponseEntity.ok(new ApiResponse(false, "网站没有找到"));
+            return ResponseEntity.ok(new ApiResponse(1, "网站没有找到"));
         }
 
         // TODO 怎么知道是否删除成功
         this.websiteRepository.delete(website);
         this.logger.info(loggerInfo + " deleted " + userId + " " + id);
 
-        return ResponseEntity.ok(new ApiResponse(true, "OK"));
+        return ResponseEntity.ok(new ApiResponse(0, "OK"));
     }
 
     @PostMapping(value = "/add")
@@ -154,6 +154,6 @@ public class WebsiteController {
 
         this.websiteRepository.save(website);
 
-        return ResponseEntity.ok(new ApiResponse(true, "OK"));
+        return ResponseEntity.ok(new ApiResponse(0, "OK"));
     }
 }

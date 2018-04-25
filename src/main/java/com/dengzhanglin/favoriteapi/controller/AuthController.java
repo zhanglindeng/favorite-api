@@ -82,14 +82,14 @@ public class AuthController {
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
             // return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"), HttpStatus.BAD_REQUEST);
             logger.info(loggerInfo + " 邮箱已经注册");
-            return ResponseEntity.ok(new ApiResponse(false, "该邮箱已经注册"));
+            return ResponseEntity.ok(new ApiResponse(1, "该邮箱已经注册"));
         }
 
         // 检查验证码
         Optional<RegisterVerifyCode> last = registerVerifyCodeRepository.findLastByEmail(email);
         if (!last.isPresent()) {
             logger.info(loggerInfo + " 没有找到最后一个验证码");
-            return ResponseEntity.ok(new ApiResponse(false, "找不到该邮箱的验证码"));
+            return ResponseEntity.ok(new ApiResponse(1, "找不到该邮箱的验证码"));
         }
 
         String verifyCode = registerRequest.getVerifyCode();
@@ -99,7 +99,7 @@ public class AuthController {
         if (!lastCode.getCode().equals(verifyCode)) {
             // TODO 纪录注册验证码错误次数，防止被暴力破解
             logger.info(loggerInfo + " 验证码错误");
-            return ResponseEntity.ok(new ApiResponse(false, "验证码错误"));
+            return ResponseEntity.ok(new ApiResponse(1, "验证码错误"));
         }
 
         // 当前时间
@@ -107,7 +107,7 @@ public class AuthController {
         // 是否过期
         if (instant.isAfter(lastCode.getExpiredAt())) {
             logger.info(loggerInfo + " 验证码已经过期");
-            return ResponseEntity.ok(new ApiResponse(false, "验证码已经过期"));
+            return ResponseEntity.ok(new ApiResponse(1, "验证码已经过期"));
         }
 
         User user = new User();
@@ -137,7 +137,7 @@ public class AuthController {
         // check email
         if (userRepository.existsByEmail(email)) {
             logger.info("[verifyCode]" + email + " 邮箱已经注册");
-            return ResponseEntity.ok(new ApiResponse(false, "该邮箱已经注册"));
+            return ResponseEntity.ok(new ApiResponse(1, "该邮箱已经注册"));
         }
 
         // now
@@ -158,7 +158,7 @@ public class AuthController {
                 logger.info("[verifyCode]" + temp.getCreatedAt().toString() + " " + cal.toString());
                 if (cal.toInstant().isBefore(temp.getCreatedAt())) {
                     logger.info("[verifyCode]" + email + " 操作频繁，请稍后再试");
-                    return ResponseEntity.ok(new ApiResponse(false, "操作频繁，请稍后再试"));
+                    return ResponseEntity.ok(new ApiResponse(1, "操作频繁，请稍后再试"));
                 }
                 break;
             }
@@ -172,12 +172,12 @@ public class AuthController {
             date = format.parse(format.format(new Date()) + " 00:00:00");
             if (registerVerifyCodeRepository.countByEmailAndCreatedAtAfter(email, date.toInstant()) > 19) {
                 logger.info("[verifyCode]" + email + " 当天累计发送邮件已经达到 20 ");
-                return ResponseEntity.ok(new ApiResponse(false, "当天累计发送邮件已经达到 20 封"));
+                return ResponseEntity.ok(new ApiResponse(1, "当天累计发送邮件已经达到 20 封"));
             }
         } catch (ParseException e) {
             e.printStackTrace();
             logger.info("[verifyCode]" + email + " " + e.getMessage());
-            return ResponseEntity.ok(new ApiResponse(false, "服务器错误"));
+            return ResponseEntity.ok(new ApiResponse(1, "服务器错误"));
         }
 
         // code
@@ -202,6 +202,6 @@ public class AuthController {
             registerVerifyCodeRepository.save(verifyCode);
         }
 
-        return ResponseEntity.ok(new ApiResponse(true, "OK"));
+        return ResponseEntity.ok(new ApiResponse(1, "OK"));
     }
 }
