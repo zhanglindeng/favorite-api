@@ -102,7 +102,7 @@ public class WebsiteController {
                 this.websiteRepository.modifyById(tempSort + 1, tempId, updatedAt);
             }
         } else {
-            // after
+            // after，没有填写或是 after 不存在都相当与 first = true
             Long after = addWebsiteRequest.getAfter();
             while (iterator1.hasNext()) {
                 Map.Entry entry = (Map.Entry) iterator1.next();
