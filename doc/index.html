@@ -9,9 +9,13 @@
 </head>
 <body>
 
+<div class="container" style="display: none" id="container">
+    <h3>我的收藏</h3>
+</div>
+
 <!--登录 modal-->
 <div class="modal fade" id="login_modal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">登录</h5>
@@ -41,7 +45,7 @@
 
 <!--注册 modal-->
 <div class="modal fade" id="register_modal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">注册</h5>
@@ -67,6 +71,7 @@
                     <label for="register_password">密码</label>
                     <input type="password" class="form-control" id="register_password" name="register_password"
                            placeholder="请输入密码">
+                    <small class="form-text text-muted">大小写字母和数字组成，6 - 20 位</small>
                 </div>
                 <div class="form-group">
                     <label for="register_password2">确认密码</label>
@@ -91,7 +96,10 @@
     // API 地址
     var api_urls = {
         // 获取验证码 API 地址
-        get_verify_code: api_host + '/auth/verifyCode'
+        get_verify_code: api_host + '/auth/verifyCode',
+        register: api_host + '/auth/register',
+        login: api_host + '/auth/login',
+        user: api_host + '/user'
     };
     // 是否正在请求
     var is_requesting = false;
@@ -157,7 +165,6 @@
             }
         });
 
-
         // 登录 modal 中的注册按钮
         $('#login_modal_register_btn').on('click', function () {
             // 关闭登录 modal
@@ -186,12 +193,19 @@
         var $login_email = $('input[name="login_email"]');
         var $login_password = $('input[name="login_password"]');
         var $login_btn = $('#login_btn');
+        // 点击登录按钮
+        $login_btn.on('click', on_click_login_btn);
         // 注册 input
         var $register_email = $('input[name="register_email"]');
         var $verify_code = $('input[name="verify_code"]');
         var $register_password = $('input[name="register_password"]');
         var $register_password2 = $('input[name="register_password2"]');
         var $register_btn = $('#register_btn');
+        // 点击注册按钮
+        $register_btn.on('click', on_click_register_btn);
+
+        // container
+        var $container = $('#container');
 
         // 读取 token
         var token = get_local_token();
@@ -217,17 +231,42 @@
 
         // 获取用户收藏
         function get_user_favorite(token) {
+            // 调用 API
+            $.ajax({
+                'url': api_urls.user,
+                'method': 'GET',
+                // 用户认证 token
+                'headers': {
+                    'Authorization': 'Bearer ' + token
+                }
+            }).done(function (response) {
+                console.log(response);
+                if (is_success(response)) {
+                    // 输出收藏
+                    render_favorite(response.categories);
+                    // TODO 显示用户信息
+                    return;
+                }
 
+                // 失败
+                error_tip(get_error_message(response));
+            });
         }
 
-        // 输出用户收藏
+        // TODO 输出用户收藏
         function render_favorite(categories) {
             console.log(categories);
+
+
+            // 显示我的收藏
+            $container.show();
         }
 
         // 显示登录 modal
         function show_login_modal() {
-            $login_modal.modal('show');
+            $login_modal.modal({
+                'backdrop': 'static'
+            });
         }
 
         // 关闭登录 modal
@@ -237,7 +276,9 @@
 
         // 显示注册 modal
         function show_register_modal() {
-            $register_modal.modal('show');
+            $register_modal.modal({
+                'backdrop': 'static'
+            });
         }
 
         // 关闭注册 modal
@@ -292,7 +333,10 @@
                 error_tip('请输入邮箱地址');
                 return false;
             }
-            // TODO 判断是否是正确的邮箱格式
+            if (!is_email(email)) {
+                error_tip('邮箱格式错误');
+                return false;
+            }
             return email;
         }
 
@@ -346,7 +390,191 @@
                 $get_verify_code_btn.html((countdown_time--) + ' 秒后重发');
             }, 1000);
         }
+
         // 点击注册
+        function on_click_register_btn() {
+            // 注册邮箱
+            var email = get_register_email();
+            if (!email) {
+                return;
+            }
+
+            // 验证码
+            var verify_code = get_verify_code();
+            if (!verify_code) {
+                return;
+            }
+
+            // 密码
+            var password = get_register_password();
+            if (!password) {
+                return;
+            }
+
+            // 发起请求的 btn
+            request_btn = $(this);
+
+            // 调用 API
+            $.ajax({
+                'url': api_urls.register,
+                'method': 'POST',
+                'data': JSON.stringify({
+                    email: email,
+                    password: password,
+                    verifyCode: verify_code
+                })
+            }).done(function (response) {
+                console.log(response);
+                if (is_success(response)) {
+                    // TODO 注册成功
+                    return;
+                }
+
+                // 失败
+                error_tip(get_error_message(response));
+            });
+        }
+
+        // 获取验证码
+        function get_verify_code() {
+            var verify_code = $verify_code.val();
+            // 去掉前后空格
+            verify_code = verify_code.trim();
+            // 是否为空
+            if (verify_code.length === 0) {
+                error_tip('请输入验证码');
+                return false;
+            }
+            return verify_code;
+        }
+
+        // 获取注册输入的密码
+        function get_register_password() {
+            var password = $register_password.val();
+            password = password.trim();
+            // 是否为空
+            if (password.length === 0) {
+                error_tip('请输入密码');
+                return false;
+            }
+
+            // 格式是否正确
+            var reg = /^[a-zA-Z0-9]{6,20}$/;
+            if (!reg.test(password)) {
+                error_tip('密码格式错误');
+                return false;
+            }
+
+            // 两次密码是否一致
+            if (password !== $register_password2.val()) {
+                error_tip('两次密码不一致');
+                return false;
+            }
+
+            return password;
+        }
+
+        // 点击登录
+        function on_click_login_btn() {
+            // 邮箱
+            var email = get_login_email();
+            if (!email) {
+                return;
+            }
+
+            // 密码
+            var password = get_login_password();
+            if (!password) {
+                return;
+            }
+
+            // 发起请求的 btn
+            request_btn = $(this);
+
+            // 调用 API
+            $.ajax({
+                'url': api_urls.login,
+                'method': 'POST',
+                'data': JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }).done(function (response) {
+                console.log(response);
+                if (is_success(response)) {
+                    // NOTICE 因为 alert 后又延迟，这里先释放掉 is_requesting
+                    reset_is_requesting();
+
+                    login_success(response);
+                    return;
+                }
+
+                // 失败
+                error_tip(get_error_message(response));
+            });
+        }
+
+        // 获取登录邮箱
+        function get_login_email() {
+            var email = $login_email.val();
+            // 去掉前后空格
+            email = email.trim();
+            // 是否为空
+            if (email.length === 0) {
+                error_tip('请输入邮箱地址');
+                return false;
+            }
+            if (!is_email(email)) {
+                error_tip('邮箱格式错误');
+                return false;
+            }
+            return email;
+        }
+
+        // TODO 判断是否是正确的邮箱格式
+        function is_email(email) {
+            console.log(email);
+            return true;
+        }
+
+        // 获取登录密码
+        function get_login_password() {
+            var password = $login_password.val();
+            password = password.trim();
+            // 是否为空
+            if (password.length === 0) {
+                error_tip('请输入密码');
+                return false;
+            }
+            return password;
+        }
+
+        // 获取服务器返回的 token
+        function get_response_token(response) {
+            if (typeof response.token === 'undefined') {
+                console.log('response.token undefined');
+                return '';
+            }
+            return response.token;
+        }
+
+        // 登陆成功
+        function login_success(response) {
+            var token = get_response_token(response);
+            if (!token) {
+                error_tip('获取 token 失败');
+                return;
+            }
+
+            // 保存 token 到 local storage
+            update_local_token(token);
+
+            // 关闭登录 modal
+            close_login_modal();
+
+            // 获取用户收藏并显示到网页
+            get_user_favorite(token);
+        }
     });
 </script>
 </body>
