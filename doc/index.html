@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Favorites</title>
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<!--登录 modal-->
+<div class="modal fade" id="login_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">登录</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="login_email">邮箱</label>
+                    <input type="email" class="form-control" id="login_email" name="login_email" placeholder="请输入邮箱地址">
+                </div>
+                <div class="form-group">
+                    <label for="login_password">密码</label>
+                    <input type="password" class="form-control" id="login_password" name="login_password"
+                           placeholder="请输入密码">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="login_modal_register_btn">注册</button>
+                <button type="button" class="btn btn-primary" id="login_btn">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--登录 modal-->
+
+<!--注册 modal-->
+<div class="modal fade" id="register_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">注册</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="register_email">邮箱</label>
+                    <input type="email" class="form-control" id="register_email" name="register_email"
+                           placeholder="请输入邮箱地址">
+                </div>
+                <div class="form-group">
+                    <label for="verify_code">邮箱验证码</label>
+                    <input type="text" class="form-control" id="verify_code" name="verify_code"
+                           placeholder="请输入邮箱验证码">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="get_verify_code_btn">获取验证码</button>
+                </div>
+                <div class="form-group">
+                    <label for="register_password">密码</label>
+                    <input type="password" class="form-control" id="register_password" name="register_password"
+                           placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label for="register_password2">确认密码</label>
+                    <input type="password" class="form-control" id="register_password2" name="register_password2"
+                           placeholder="请再次输入密码">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="register_modal_login_btn">登录</button>
+                <button type="button" class="btn btn-primary" id="register_btn">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--注册 modal-->
+
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script>
+    // API host
+    var api_host = 'http://120.77.34.120:8080';
+    // API 地址
+    var api_urls = {
+        // 获取验证码 API 地址
+        get_verify_code: api_host + '/auth/verifyCode'
+    };
+    // 是否正在请求
+    var is_requesting = false;
+    // 发起请求的 button
+    var request_btn = null;
+    // 120 秒间隔
+    var countdown_time = 120;
+    // 定时器
+    var interval = null;
+    // html 页面文档加载完成后执行
+    $(function () {
+        /**
+         * 设置 ajax 全局参数
+         */
+        $.ajaxSetup({
+            'async': true,
+            'crossDomain': true,
+            'headers': {
+                'content-type': 'application/json'
+            },
+            'processData': false,
+            'beforeSend': function () {
+                console.log('ajax: beforeSend');
+                // 如果正在请求，取消
+                if (is_requesting) {
+                    console.log('is_requesting');
+                    return false;
+                } else {
+                    mark_is_requesting();
+                    // 锁定发起请求的 btn
+                    request_btn && disabled_btn(request_btn);
+                }
+            },
+            // 请求完成后调用，不管 success 还是 error
+            'complete': function () {
+                console.log('ajax: complete');
+                // 重置 is_requesting
+                reset_is_requesting();
+                // 解锁发起请求的 btn
+                request_btn && enable_btn(request_btn);
+                // 重置为 null
+                request_btn = null;
+            },
+            // 请求失败时调用
+            'error': function (xhr, textStatus, error) {
+                console.log('ajax: error');
+                console.log('status: ' + xhr.status);
+                console.log('textStatus: ' + textStatus);
+                console.log('error: ' + error);
+                if (xhr.status === 404) {
+                    error_tip('请求 URL 错误');
+                }
+                // 如果是 status 是 4xx，显示登录 modal
+                else if (xhr.status >= 400 && xhr.status < 500) {
+                    error_tip('请先登录');
+                    close_register_modal();
+                    show_login_modal();
+                } else if (xhr.status >= 500) {
+                    error_tip('抱歉，服务器错误');
+                } else {
+                    error_tip('发生未知错误');
+                }
+            }
+        });
+
+
+        // 登录 modal 中的注册按钮
+        $('#login_modal_register_btn').on('click', function () {
+            // 关闭登录 modal
+            close_login_modal();
+            // 显示注册 modal
+            show_register_modal();
+        });
+        // 注册 modal 中的登录按钮
+        $('#register_modal_login_btn').on('click', function () {
+            // 关闭注册 modal
+            close_register_modal();
+            // 显示登录 modal
+            show_login_modal();
+        });
+
+        // 登陆 modal
+        var $login_modal = $('#login_modal');
+        // 注册 modal
+        var $register_modal = $('#register_modal');
+        // 获取邮箱验证码
+        var $get_verify_code_btn = $('#get_verify_code_btn');
+        // 点击获取邮箱验证码按钮事件
+        $get_verify_code_btn.on('click', on_click_get_verify_code_btn);
+
+        // 登录 input
+        var $login_email = $('input[name="login_email"]');
+        var $login_password = $('input[name="login_password"]');
+        var $login_btn = $('#login_btn');
+        // 注册 input
+        var $register_email = $('input[name="register_email"]');
+        var $verify_code = $('input[name="verify_code"]');
+        var $register_password = $('input[name="register_password"]');
+        var $register_password2 = $('input[name="register_password2"]');
+        var $register_btn = $('#register_btn');
+
+        // 读取 token
+        var token = get_local_token();
+        // 如果 token 不为空
+        if (token) {
+            return get_user_favorite(token);
+        }
+
+        // 弹出登录 modal
+        show_login_modal();
+
+        // 从 local storage 获取 token
+        function get_local_token() {
+            return localStorage.getItem('token');
+        }
+
+        // 更新 local storage 的 token
+        function update_local_token(token) {
+            // 删除原来的
+            localStorage.removeItem('token');
+            localStorage.setItem('token', token);
+        }
+
+        // 获取用户收藏
+        function get_user_favorite(token) {
+
+        }
+
+        // 输出用户收藏
+        function render_favorite(categories) {
+            console.log(categories);
+        }
+
+        // 显示登录 modal
+        function show_login_modal() {
+            $login_modal.modal('show');
+        }
+
+        // 关闭登录 modal
+        function close_login_modal() {
+            $login_modal.modal('hide');
+        }
+
+        // 显示注册 modal
+        function show_register_modal() {
+            $register_modal.modal('show');
+        }
+
+        // 关闭注册 modal
+        function close_register_modal() {
+            $register_modal.modal('hide');
+        }
+
+        // 错误提示
+        function error_tip(msg) {
+            console.log(msg);
+            alert(msg);
+        }
+
+        // 点击获取邮箱验证码时
+        function on_click_get_verify_code_btn() {
+            // 注册邮箱
+            var email = get_register_email();
+            if (!email) {
+                return;
+            }
+
+            // 发起请求的 btn
+            request_btn = $(this);
+
+            // 调用 API
+            $.ajax({
+                'url': api_urls.get_verify_code,
+                'method': 'POST',
+                'data': JSON.stringify({
+                    email: email
+                })
+            }).done(function (response) {
+                console.log(response);
+                if (is_success(response)) {
+                    // 开始倒计时 120
+                    verify_code_countdown();
+                    return;
+                }
+
+                // 失败
+                error_tip(get_error_message(response));
+            });
+        }
+
+        // 获取注册邮箱
+        function get_register_email() {
+            var email = $register_email.val();
+            // 去掉前后空格
+            email = email.trim();
+            // 是否为空
+            if (email.length === 0) {
+                error_tip('请输入邮箱地址');
+                return false;
+            }
+            // TODO 判断是否是正确的邮箱格式
+            return email;
+        }
+
+        // 标记正在请求
+        function mark_is_requesting() {
+            is_requesting = true;
+        }
+
+        // 标记不是正在请求
+        function reset_is_requesting() {
+            is_requesting = false;
+        }
+
+        // 判断请求是否成功
+        function is_success(data) {
+            return data.code === 0;
+        }
+
+        // 获取错误 message
+        function get_error_message(data) {
+            return data.message || '未知错误';
+        }
+
+        // 设置 button 的 disabled => true
+        function disabled_btn(btn) {
+            btn.prop('disabled', true);
+        }
+
+        // 设置 button 的 disabled => false
+        function enable_btn(btn) {
+            btn.prop('disabled', false);
+        }
+
+        // 发送邮箱验证码 120 秒倒计时
+        function verify_code_countdown() {
+            console.log('verify_code_countdown');
+
+            // 锁定 btn
+            disabled_btn($get_verify_code_btn);
+
+            // 开始定时器
+            interval = setInterval(function () {
+                if (countdown_time < 1) {
+                    // 解锁 btn
+                    enable_btn($get_verify_code_btn);
+
+                    $get_verify_code_btn.html('获取验证码');
+                    clearInterval(interval);
+                    return;
+                }
+                $get_verify_code_btn.html((countdown_time--) + ' 秒后重发');
+            }, 1000);
+        }
+        // 点击注册
+    });
+</script>
+</body>
+</html>
