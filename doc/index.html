@@ -981,7 +981,7 @@
             });
         }
 
-        // 新网站分类
+        // 新网站名称
         function get_website_name() {
             var name = $website_name.val();
             name = name.trim();
@@ -1051,7 +1051,7 @@
         // 当网站分类改变时
         function on_website_category_change() {
             var id = $website_category.val();
-            id = parseFloat(id);
+            id = parseInt(id);
             if (!isNaN(id)) {
                 website_category_id = id;
             }
