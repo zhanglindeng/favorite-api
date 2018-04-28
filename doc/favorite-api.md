@@ -277,6 +277,7 @@ POST
 | :--- | :--- | :---: | :--- |
 | `name` | `string` | 是 | 网站名称，不能超过 `20` 个字符 |
 | `url` | `string` | 是 | 网站 `URL` |
+| `icon` | `string` | 是 | `icon` 链接 |
 | `description` | `string` | 是 | 网站简介 |
 | `categoryId` | `int` | 是 | 分类 `ID` | 
 | `first` | `bool` | 是 | 是否排在第一位 |
@@ -289,6 +290,7 @@ POST
 {
 	"name": "腾讯 AlloyTeam 团队",
 	"url": "http://www.alloyteam.com/",
+	"icon": "http://www.alloyteam.com/nav/static/images/alloyteam-favicon.jpg",
 	"description": "腾讯Web前端团队，代表作品WebQQ，致力于前端技术的研究",
 	"categoryId": 10,
 	"first": true,
@@ -379,6 +381,7 @@ GET
                 {
                     "id": 4,
                     "url": "https://www.baidu.com",
+		    "icon": "https://gss1.bdstatic.com/5eN1dDebRNRTm2_p8IuM_a/res/img/baiduzhongban-4.gif?1524924515",
                     "description": "百度一下，你就知道",
                     "createdAt": "2018-04-22 15:45:32",
                     "updatedAt": "2018-04-22 15:45:32",
