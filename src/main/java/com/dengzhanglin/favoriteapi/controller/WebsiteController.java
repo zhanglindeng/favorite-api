@@ -132,6 +132,7 @@ public class WebsiteController {
         website.setUrl(addWebsiteRequest.getUrl());
         website.setName(addWebsiteRequest.getName());
         website.setDescription(addWebsiteRequest.getDescription());
+        website.setIcon(addWebsiteRequest.getIcon());
 
         // time
         Instant instant = Instant.now();

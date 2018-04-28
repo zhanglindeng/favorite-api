@@ -38,6 +38,15 @@ public class Website {
     @NotBlank
     @Size(max = 20)
     private String name;
+    private String icon;
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
 
     public User getUser() {
         return user;

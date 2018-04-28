@@ -23,6 +23,18 @@ public class AddWebsiteRequest {
     @NotNull
     private Long categoryId;
 
+    @NotBlank
+    @Size(max = 255)
+    private String icon;
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
     public Long getCategoryId() {
         return categoryId;
     }
